@@ -89,3 +89,18 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// custom syscall added for CS 202 Lab 1
+// one integer parameter with value 1, 2 or 3
+// 1 - count of the processes in the system
+// 2 - count of the total number of system calls that the current process has made so far
+// 3 - number of memory pages the current process is using
+int
+sys_info(void)
+{
+  int option;
+  if(argint(0, &option) < 0)
+    return -1;
+  
+  // TODO implement the options
+}
