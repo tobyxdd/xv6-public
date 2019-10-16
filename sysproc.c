@@ -103,4 +103,11 @@ sys_info(void)
     return -1;
   
   // TODO implement the options
+  if(option == 1){
+    return proccount();
+  }else if(option == 2){
+    return procsyscallcount();
+  }else{
+    return -1;
+  }
 }
