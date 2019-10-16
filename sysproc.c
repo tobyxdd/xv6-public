@@ -107,6 +107,8 @@ sys_info(void)
     return proccount();
   }else if(option == 2){
     return procsyscallcount();
+  }else if(option == 3){
+    return (myproc()->sz)/PGSIZE;
   }else{
     return -1;
   }
