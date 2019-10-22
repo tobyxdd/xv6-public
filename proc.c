@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->syscallcount = 0;
 
   release(&ptable.lock);
 
@@ -531,4 +532,25 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+// Return the count of valid processes
+// (SLEEPING, RUNNABLE or RUNNING)
+int proccount(void)
+{
+  int i=0;
+  struct proc *p;
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(!p->killed && (p->state == SLEEPING || p->state == RUNNABLE || p->state == RUNNING)){
+      i++;
+    }
+  }
+  return i;
+}
+
+// Return syscall count of current process
+int procsyscallcount(void)
+{
+  return myproc()->syscallcount;
 }
