@@ -7,67 +7,62 @@
 #include "mmu.h"
 #include "proc.h"
 
-int
-sys_fork(void)
+int sys_fork(void)
 {
   return fork();
 }
 
-int
-sys_exit(void)
+int sys_exit(void)
 {
   exit();
-  return 0;  // not reached
+  return 0; // not reached
 }
 
-int
-sys_wait(void)
+int sys_wait(void)
 {
   return wait();
 }
 
-int
-sys_kill(void)
+int sys_kill(void)
 {
   int pid;
 
-  if(argint(0, &pid) < 0)
+  if (argint(0, &pid) < 0)
     return -1;
   return kill(pid);
 }
 
-int
-sys_getpid(void)
+int sys_getpid(void)
 {
   return myproc()->pid;
 }
 
-int
-sys_sbrk(void)
+int sys_sbrk(void)
 {
   int addr;
   int n;
 
-  if(argint(0, &n) < 0)
+  if (argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  if (growproc(n) < 0)
     return -1;
   return addr;
 }
 
-int
-sys_sleep(void)
+int sys_sleep(void)
 {
   int n;
   uint ticks0;
 
-  if(argint(0, &n) < 0)
+  if (argint(0, &n) < 0)
     return -1;
   acquire(&tickslock);
   ticks0 = ticks;
-  while(ticks - ticks0 < n){
-    if(myproc()->killed){
+  while (ticks - ticks0 < n)
+  {
+    if (myproc()->killed)
+    {
       release(&tickslock);
       return -1;
     }
@@ -79,8 +74,7 @@ sys_sleep(void)
 
 // return how many clock tick interrupts have occurred
 // since start.
-int
-sys_uptime(void)
+int sys_uptime(void)
 {
   uint xticks;
 
@@ -95,21 +89,40 @@ sys_uptime(void)
 // 1 - count of the processes in the system
 // 2 - count of the total number of system calls that the current process has made so far
 // 3 - number of memory pages the current process is using
-int
-sys_info(void)
+int sys_info(void)
 {
   int option;
-  if(argint(0, &option) < 0)
+  if (argint(0, &option) < 0)
     return -1;
-  
+
   // TODO implement the options
-  if(option == 1){
+  if (option == 1)
+  {
     return proccount();
-  }else if(option == 2){
+  }
+  else if (option == 2)
+  {
     return procsyscallcount();
-  }else if(option == 3){
-    return (myproc()->sz)/PGSIZE;
-  }else{
+  }
+  else if (option == 3)
+  {
+    return (myproc()->sz) / PGSIZE;
+  }
+  else
+  {
     return -1;
   }
+}
+
+// custom syscall added for CS 202 Lab 2
+// set current process ticket value
+// for lottery/stride scheduler
+int sys_tickets(void)
+{
+  int tickets;
+  if (argint(0, &tickets) < 0)
+    return -1;
+
+  myproc()->tickets = tickets;
+  return 0;
 }
