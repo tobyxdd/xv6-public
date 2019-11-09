@@ -341,21 +341,6 @@ int calc_total_tickets(void)
   return total;
 }
 
-int calc_total_ticks(void)
-{
-  struct proc *p;
-  int total = 0;
-
-  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-  {
-    if (p->state == RUNNABLE)
-    {
-      total += p->tick;
-    }
-  }
-  return total;
-}
-
 // Copied from usertests.c
 // RNG for scheduler
 unsigned long sched_randstate = 1;
@@ -401,33 +386,6 @@ void scheduler(void)
     else
     {
       current_ticket = 0;
-    }
-
-    if (calc_total_ticks() % 100 == 0)
-    {
-      // Print stats
-      /*-------The following code is added to format the output--------*/
-      /* NOTE that you need to replace sched_times in the cprintf with whatever you use to record the execution time */
-      static char *states[] = {
-          [UNUSED] "unused",
-          [EMBRYO] "embryo",
-          [SLEEPING] "sleep ",
-          [RUNNABLE] "runble",
-          [RUNNING] "run   ",
-          [ZOMBIE] "zombie"};
-      char *state;
-      for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-      {
-        if (p->state == UNUSED)
-          continue;
-        if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
-          state = states[p->state];
-        else
-          state = "???";
-
-        cprintf("From  %s-%d: %d %s %s sched_times=%d ticket=%d \n", myproc()->name, myproc()->pid, p->pid, state, p->name, p->tick, p->tickets);
-      }
-      /*------------------patch end------------------------ */
     }
 
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
@@ -665,4 +623,33 @@ int proccount(void)
 int procsyscallcount(void)
 {
   return myproc()->syscallcount;
+}
+
+int procticksdump(void)
+{
+  struct proc *p;
+  // Print stats
+  /*-------The following code is added to format the output--------*/
+  /* NOTE that you need to replace sched_times in the cprintf with whatever you use to record the execution time */
+  static char *states[] = {
+      [UNUSED] "unused",
+      [EMBRYO] "embryo",
+      [SLEEPING] "sleep ",
+      [RUNNABLE] "runble",
+      [RUNNING] "run   ",
+      [ZOMBIE] "zombie"};
+  char *state;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state == UNUSED)
+      continue;
+    if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+
+    cprintf("From  %s-%d: %d %s %s sched_times=%d ticket=%d \n", myproc()->name, myproc()->pid, p->pid, state, p->name, p->tick, p->tickets);
+  }
+  /*------------------patch end------------------------ */
+  return 0;
 }

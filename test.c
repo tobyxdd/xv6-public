@@ -16,7 +16,7 @@ int Scheduler(void)
 {
 
     int pid;
-    int i, j, k;
+    int i, j, k, p;
 
     /*Replace YOUR_SYSCALL_TO_ASSIGN_TICKET with what you implement to assign ticket */
     tickets(60);
@@ -31,12 +31,16 @@ int Scheduler(void)
         {
 
             tickets(30 - 10 * i);
-            for (j = 0; j < 50000; j++)
+            for (p = 0; p < 50; p++)
             {
-                for (k = 0; k < 50000; k++)
+                for (j = 0; j < 1000; j++)
                 {
-                    asm("nop");
+                    for (k = 0; k < 50000; k++)
+                    {
+                        asm("nop");
+                    }
                 }
+                ticks();
             }
             printf(1, "\n  child# %d with %d tickets has finished!  \n", getpid(), 30 - 10 * i);
             exit();
