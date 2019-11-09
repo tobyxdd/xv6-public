@@ -238,6 +238,29 @@ void exit(void)
   struct proc *p;
   int fd;
 
+  /*-------The following code is added to format the output--------*/
+  /* NOTE that you need to replace sched_times in the cprintf with whatever you use to record the execution time */
+  static char *states[] = {
+      [UNUSED] "unused",
+      [EMBRYO] "embryo",
+      [SLEEPING] "sleep ",
+      [RUNNABLE] "runble",
+      [RUNNING] "run   ",
+      [ZOMBIE] "zombie"};
+  char *state;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state == UNUSED)
+      continue;
+    if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+
+    cprintf("From  %s-%d: %d %s %s sched_times=%d ticket=%d \n", myproc()->name, myproc()->pid, p->pid, state, p->name, p->tick, p->tickets);
+  }
+  /*------------------patch end------------------------ */
+
   if (curproc == initproc)
     panic("init exiting");
 
@@ -273,6 +296,7 @@ void exit(void)
   }
 
   // Jump into the scheduler, never to return.
+
   curproc->state = ZOMBIE;
   sched();
   panic("zombie exit");
