@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
     const int loop = 43000;
     for (i = 0; i < loop; i++)
     {
-        asm(nop); //in order to prevent the compiler from optimizing the for loop
+        asm("nop"); //in order to prevent the compiler from optimizing the for loop
         for (k = 0; k < loop; k++)
         {
-            asm(nop);
+            asm("nop");
         }
     }
     printf(1, "prog2 ticks: %d\n", ticks());
