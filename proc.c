@@ -376,7 +376,15 @@ void scheduler(void)
 
     count = 0;
     total_tickets = calc_total_tickets();
-    current_ticket = sched_rand() % total_tickets;
+
+    if (total_tickets > 0)
+    {
+      current_ticket = sched_rand() % total_tickets;
+    }
+    else
+    {
+      current_ticket = 0;
+    }
 
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
