@@ -62,6 +62,7 @@ struct proc
   char name[16];              // Process name (debugging)
   int syscallcount;           // System call counter
   int tickets;                // Ticket value for lottery/stride scheduler
+  int tick;                   // Tick counter
 };
 
 // Process memory is laid out contiguously, low addresses first:

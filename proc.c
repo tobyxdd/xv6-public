@@ -92,6 +92,7 @@ found:
   p->pid = nextpid++;
   p->syscallcount = 0;
   p->tickets = 100;
+  p->tick = 0;
 
   release(&ptable.lock);
 
@@ -362,7 +363,7 @@ void scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
 
-  int count;
+  int cursor;
   int total_tickets;
   long current_ticket;
 
@@ -374,7 +375,7 @@ void scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-    count = 0;
+    cursor = 0;
     total_tickets = calc_total_tickets();
 
     if (total_tickets > 0)
@@ -393,9 +394,9 @@ void scheduler(void)
 
       // [-- proc1 --][-- proc2 --][-- proc3 --]
       //  ------ count ------ ^ (current_ticket)
-      if ((p->tickets + count) < current_ticket)
+      if ((p->tickets + cursor) < current_ticket)
       {
-        count += p->tickets;
+        cursor += p->tickets;
         continue;
       }
 
@@ -405,6 +406,9 @@ void scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+
+      // Increase tick counter
+      p->tick++;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();

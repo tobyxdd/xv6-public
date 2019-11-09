@@ -126,3 +126,10 @@ int sys_tickets(void)
   myproc()->tickets = tickets;
   return 0;
 }
+
+// custom syscall added for CS 202 Lab 2
+// get current process tick counter
+int sys_ticks(void)
+{
+  return myproc()->tick;
+}
