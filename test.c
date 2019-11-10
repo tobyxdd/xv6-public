@@ -40,7 +40,10 @@ int Scheduler(void)
                         asm("nop");
                     }
                 }
-                ticks();
+                if (i == 0)
+                {
+                    ticks();
+                }
             }
             printf(1, "\n  child# %d with %d tickets has finished!  \n", getpid(), 30 - 10 * i);
             exit();
