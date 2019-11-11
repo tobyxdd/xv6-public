@@ -63,6 +63,7 @@ struct proc
   int syscallcount;           // System call counter
   int tickets;                // Ticket value for lottery/stride scheduler
   int tick;                   // Tick counter
+  float stride;               // Stride value
 };
 
 // Process memory is laid out contiguously, low addresses first:

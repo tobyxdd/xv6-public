@@ -93,6 +93,7 @@ found:
   p->syscallcount = 0;
   p->tickets = 100;
   p->tick = 0;
+  p->stride = 0;
 
   release(&ptable.lock);
 
@@ -350,23 +351,16 @@ unsigned int sched_rand()
   return sched_randstate;
 }
 
-//PAGEBREAK: 42
-// Per-CPU process scheduler.
-// Each CPU calls scheduler() after setting itself up.
-// Scheduler never returns.  It loops, doing:
-//  - choose a process to run
-//  - swtch to start running that process
-//  - eventually that process transfers control
-//      via swtch back to the scheduler.
+// Stride
 void scheduler(void)
 {
   struct proc *p;
+  struct proc *cp = 0; // pointer to the to-be-scheduled process
+
   struct cpu *c = mycpu();
   c->proc = 0;
 
-  int cursor;
-  int total_tickets;
-  long current_ticket;
+  float min_stride;
 
   for (;;)
   {
@@ -376,51 +370,40 @@ void scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-    cursor = 0;
-    total_tickets = calc_total_tickets();
-
-    if (total_tickets > 0)
-    {
-      current_ticket = sched_rand() % total_tickets;
-    }
-    else
-    {
-      current_ticket = 0;
-    }
-
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
       if (p->state != RUNNABLE)
         continue;
 
-      // [-- proc1 --][-- proc2 --][-- proc3 --]
-      //  ------ cursor ------ ^ (current_ticket)
-      if ((p->tickets + cursor) < current_ticket)
+      if (cp == 0)
       {
-        cursor += p->tickets;
-        continue;
+        min_stride = p->stride;
       }
-
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
-
-      // Increase tick counter
-      p->tick++;
-
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-
-      // Only one process per iteration
-      break;
+      else if (p->stride < min_stride)
+      {
+        min_stride = p->stride;
+        cp = p;
+      }
     }
+
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    c->proc = cp;
+    switchuvm(cp);
+    cp->state = RUNNING;
+
+    // Increase tick counter
+    cp->tick++;
+    cp->stride += 1 / cp->tickets;
+
+    swtch(&(c->scheduler), cp->context);
+    switchkvm();
+
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
+    cp = 0;
     release(&ptable.lock);
   }
 }
