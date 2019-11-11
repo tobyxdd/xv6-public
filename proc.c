@@ -375,11 +375,7 @@ void scheduler(void)
       if (p->state != RUNNABLE)
         continue;
 
-      if (cp == 0)
-      {
-        min_stride = p->stride;
-      }
-      else if (p->stride < min_stride)
+      if ((cp == 0) || (p->stride < min_stride))
       {
         min_stride = p->stride;
         cp = p;
