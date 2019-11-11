@@ -382,24 +382,28 @@ void scheduler(void)
       }
     }
 
-    // Switch to chosen process.  It is the process's job
-    // to release ptable.lock and then reacquire it
-    // before jumping back to us.
-    c->proc = cp;
-    switchuvm(cp);
-    cp->state = RUNNING;
+    if (cp != 0)
+    {
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = cp;
+      switchuvm(cp);
+      cp->state = RUNNING;
 
-    // Increase tick counter
-    cp->tick++;
-    cp->stride += 1 / cp->tickets;
+      // Increase tick counter
+      cp->tick++;
+      cp->stride += 1 / cp->tickets;
 
-    swtch(&(c->scheduler), cp->context);
-    switchkvm();
+      swtch(&(c->scheduler), cp->context);
+      switchkvm();
 
-    // Process is done running for now.
-    // It should have changed its p->state before coming back.
-    c->proc = 0;
-    cp = 0;
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      cp = 0;
+    }
+
     release(&ptable.lock);
   }
 }
