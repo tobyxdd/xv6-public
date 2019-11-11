@@ -393,7 +393,7 @@ void scheduler(void)
 
       // Increase tick counter
       cp->tick++;
-      cp->stride += 1 / cp->tickets;
+      cp->stride += 1.0f / cp->tickets;
 
       swtch(&(c->scheduler), cp->context);
       switchkvm();
